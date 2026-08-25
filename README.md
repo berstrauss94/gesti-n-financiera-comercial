@@ -44,6 +44,43 @@ flask run --debug
 
 El deploy es automático: push a `main` → Railway despliega via Dockerfile.
 
+### Variables de Entorno (Railway)
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `DATABASE_URL` | URL de conexión PostgreSQL | `postgresql://user:pass@host:5432/db` |
+| `FLASK_SECRET_KEY` | Clave secreta para sesiones Flask | String aleatorio largo |
+| `SESSION_TIMEOUT_MINUTES` | Minutos de inactividad antes de expirar sesión | `30` |
+| `MAX_LOGIN_ATTEMPTS` | Intentos máximos de login antes de lockout | `5` |
+
+### Pipeline CI/CD
+
+1. **Push a `main`** o apertura de PR dispara GitHub Actions
+2. **CI (GitHub Actions)** ejecuta:
+   - Instalación de dependencias
+   - Lint con flake8 (no bloqueante)
+   - Tests unitarios con cobertura (`pytest --cov=app`)
+   - Tests de propiedades (`pytest tests/property/ -x`)
+   - Verificación de migraciones (`flask db upgrade`)
+3. **CD (Railway)** despliega automáticamente tras push exitoso a `main`
+
+### HTTPS
+
+Railway proporciona HTTPS por defecto para todos los deployments. No se requiere configuración adicional de certificados SSL.
+
+### Rollback
+
+Railway mantiene automáticamente los últimos 5 deploys. Para hacer rollback:
+
+1. Ir al dashboard de Railway → proyecto → pestaña "Deployments"
+2. Identificar el deploy anterior que funcionaba correctamente
+3. Click en "Redeploy" en ese deploy específico
+4. Railway restaura la versión anterior en segundos
+
+### Migraciones
+
+Las migraciones de base de datos se ejecutan automáticamente al inicio del contenedor, antes de arrancar el servidor web. El comando `flask db upgrade` se ejecuta en el entrypoint del Dockerfile y en el `startCommand` de Railway.
+
 ## Estructura del Proyecto
 
 ```

@@ -17,6 +17,10 @@ COPY . .
 
 # Create non-root user
 RUN useradd -m appuser && chown -R appuser:appuser /app
+
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
+
 USER appuser
 
 # Expose port
@@ -26,5 +30,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
 
-# Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--timeout", "120", "app:create_app()"]
+# Run migrations and start gunicorn
+ENTRYPOINT ["/app/entrypoint.sh"]
