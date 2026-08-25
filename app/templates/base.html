@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestión Financiera{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>💰 FinanzApp</h2>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Cerrar menú">✕</button>
+        </div>
+        <div class="sidebar-user">
+            <span class="user-icon">👤</span>
+            <span class="user-name">{{ current_user.username }}</span>
+        </div>
+        <div class="sidebar-business" id="sidebarBusiness">
+            <span class="business-label">Negocio activo:</span>
+            <span class="business-name" id="activeBusinessName">Cargando...</span>
+        </div>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('frontend.dashboard') }}" class="{% if request.endpoint == 'frontend.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
+            <li><a href="{{ url_for('frontend.income') }}" class="{% if request.endpoint == 'frontend.income' %}active{% endif %}">💵 Ingresos</a></li>
+            <li><a href="{{ url_for('frontend.expenses') }}" class="{% if request.endpoint == 'frontend.expenses' %}active{% endif %}">💸 Gastos</a></li>
+            <li><a href="{{ url_for('frontend.heatmap') }}" class="{% if request.endpoint == 'frontend.heatmap' %}active{% endif %}">🔥 Heatmap</a></li>
+            <li><a href="{{ url_for('frontend.reports') }}" class="{% if request.endpoint == 'frontend.reports' %}active{% endif %}">📈 Reportes</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn btn-outline btn-sm" id="logoutBtn">🚪 Cerrar Sesión</button>
+        </div>
+    </nav>
+    <div class="main-wrapper">
+        <header class="top-bar">
+            <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menú">☰</button>
+            <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+        </header>
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+    <main class="auth-wrapper">
+        {% block auth_content %}{% endblock %}
+    </main>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

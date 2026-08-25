@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Heatmap - Gestión Financiera{% endblock %}
+{% block page_title %}Semáforo Financiero{% endblock %}
+
+{% block content %}
+<div class="page-heatmap">
+    <!-- Date Selector -->
+    <section class="card heatmap-controls">
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="heatmapDate">Fecha</label>
+                <input type="date" id="heatmapDate" name="date">
+            </div>
+            <button class="btn btn-primary" id="loadHeatmapBtn">Cargar</button>
+        </div>
+    </section>
+
+    <!-- Net Profit Master Indicator -->
+    <section class="card net-profit-master" id="netProfitSection">
+        <h3>Indicador Maestro: Ganancia Neta</h3>
+        <div class="master-indicator" id="masterIndicator">
+            <span class="indicator-circle" id="masterCircle">—</span>
+            <div class="indicator-details">
+                <p class="indicator-label">Ganancia Neta</p>
+                <p class="indicator-value" id="masterValue">—</p>
+                <p class="indicator-percent" id="masterPercent"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heatmap Grid -->
+    <section class="card">
+        <h3>Indicadores por Categoría</h3>
+        <div class="heatmap-full-grid" id="heatmapGrid">
+            <p class="loading-text">Seleccione una fecha para cargar el semáforo</p>
+        </div>
+        <div class="heatmap-legend">
+            <span class="legend-item"><span class="circle circle-green">🟢</span> &lt;50% (Excelente)</span>
+            <span class="legend-item"><span class="circle circle-yellow">🟡</span> 50-70% (Bien)</span>
+            <span class="legend-item"><span class="circle circle-orange">🟠</span> 70-85% (Precaución)</span>
+            <span class="legend-item"><span class="circle circle-red">🔴</span> 85-100% (Alerta)</span>
+            <span class="legend-item"><span class="circle circle-critical">🚨</span> &gt;100% (Crítico)</span>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/heatmap.js') }}"></script>
+{% endblock %}

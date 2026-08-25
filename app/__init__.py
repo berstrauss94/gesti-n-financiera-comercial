@@ -2,7 +2,7 @@
 import os
 from datetime import datetime, timezone
 
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, redirect, request, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, logout_user, current_user
@@ -17,6 +17,9 @@ _PUBLIC_PATHS = frozenset([
     '/health',
     '/api/auth/login',
     '/api/auth/register',
+    '/login',
+    '/register',
+    '/',
 ])
 
 
@@ -41,6 +44,7 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    login_manager.login_view = 'frontend.login'
     CORS(app)
 
     # Configure Flask-Login user loader
@@ -49,16 +53,32 @@ def create_app(config_name=None):
         from app.models import User
         return User.query.get(int(user_id))
 
+    # Handle unauthorized access: redirect for pages, 401 for API
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'error': {
+                    'code': 'AUTH_SESSION_EXPIRED',
+                    'message': 'Sesión expirada por inactividad',
+                }
+            }), 401
+        return redirect(url_for('frontend.login'))
+
     # Session inactivity expiration middleware
     @app.before_request
     def check_session_expiration():
         """Check if session has expired due to inactivity.
 
-        Skips public paths (login, register, health).
+        Skips public paths (login, register, health) and static files.
         If the user is authenticated and last_activity is older than
         SESSION_TIMEOUT_MINUTES, logout and return 401.
         Otherwise, update last_activity to now.
         """
+        # Skip static files
+        if request.path.startswith('/static/'):
+            return None
+
         # Skip public endpoints
         if request.path in _PUBLIC_PATHS:
             return None
@@ -127,5 +147,8 @@ def create_app(config_name=None):
 
     from app.routes.ml import ml_bp
     app.register_blueprint(ml_bp, url_prefix='/api/ml')
+
+    from app.routes.frontend import frontend_bp
+    app.register_blueprint(frontend_bp)
 
     return app

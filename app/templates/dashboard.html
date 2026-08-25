@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Gestión Financiera{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Business selector modal -->
+    <div class="modal" id="businessModal">
+        <div class="modal-content">
+            <h3>Seleccionar Negocio</h3>
+            <div id="businessList" class="business-list"></div>
+            <div class="modal-actions">
+                <input type="text" id="newBusinessName" placeholder="Nombre del nuevo negocio" class="input-field">
+                <button class="btn btn-primary btn-sm" id="createBusinessBtn">Crear Negocio</button>
+            </div>
+            <button class="btn btn-outline btn-sm modal-close" id="closeBusinessModal">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <section class="summary-cards" id="summaryCards">
+        <div class="card summary-card income-card">
+            <div class="card-icon">💵</div>
+            <div class="card-body">
+                <h3>Ingreso Bruto</h3>
+                <p class="card-value" id="totalIncome">$0.00</p>
+                <small>Último mes</small>
+            </div>
+        </div>
+        <div class="card summary-card profit-card">
+            <div class="card-icon">📈</div>
+            <div class="card-body">
+                <h3>Ganancia Neta</h3>
+                <p class="card-value" id="netProfit">$0.00</p>
+                <small>Último mes</small>
+            </div>
+        </div>
+        <div class="card summary-card expense-card">
+            <div class="card-icon">💸</div>
+            <div class="card-body">
+                <h3>Total Gastos</h3>
+                <p class="card-value" id="totalExpenses">$0.00</p>
+                <small>Último mes</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- Heatmap Preview -->
+    <section class="card heatmap-preview">
+        <h3>🔥 Semáforo Financiero <small>(hoy)</small></h3>
+        <div class="heatmap-grid" id="dashboardHeatmap">
+            <p class="loading-text">Cargando indicadores...</p>
+        </div>
+        <a href="{{ url_for('frontend.heatmap') }}" class="btn btn-outline btn-sm">Ver Heatmap Completo →</a>
+    </section>
+
+    <!-- Quick Links -->
+    <section class="quick-links">
+        <h3>Acceso Rápido</h3>
+        <div class="links-grid">
+            <a href="{{ url_for('frontend.income') }}" class="quick-link-card">
+                <span>💵</span>
+                <p>Registrar Ingreso</p>
+            </a>
+            <a href="{{ url_for('frontend.expenses') }}" class="quick-link-card">
+                <span>💸</span>
+                <p>Registrar Gasto</p>
+            </a>
+            <a href="{{ url_for('frontend.heatmap') }}" class="quick-link-card">
+                <span>🔥</span>
+                <p>Ver Heatmap</p>
+            </a>
+            <a href="{{ url_for('frontend.reports') }}" class="quick-link-card">
+                <span>📈</span>
+                <p>Generar Reporte</p>
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

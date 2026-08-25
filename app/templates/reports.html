@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Reportes - Gestión Financiera{% endblock %}
+{% block page_title %}Reportes{% endblock %}
+
+{% block content %}
+<div class="page-reports">
+    <!-- Report Controls -->
+    <section class="card report-controls">
+        <h3>Generar Reporte</h3>
+        <form id="reportForm" class="form-grid" novalidate>
+            <div class="form-group">
+                <label for="reportGranularity">Período</label>
+                <select id="reportGranularity" name="granularity">
+                    <option value="daily">Diario</option>
+                    <option value="weekly">Semanal</option>
+                    <option value="monthly" selected>Mensual</option>
+                    <option value="quarterly">Trimestral</option>
+                    <option value="semiannual">Semestral</option>
+                    <option value="annual">Anual</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="reportFrom">Desde</label>
+                <input type="date" id="reportFrom" name="from" required>
+            </div>
+            <div class="form-group">
+                <label for="reportTo">Hasta</label>
+                <input type="date" id="reportTo" name="to" required>
+            </div>
+            <div class="form-group">
+                <label for="reportFilter">Filtro texto (opcional)</label>
+                <input type="text" id="reportFilter" name="filter" placeholder="Buscar en categoría/descripción">
+            </div>
+            <button type="submit" class="btn btn-primary">Generar Reporte</button>
+        </form>
+    </section>
+
+    <!-- Report Results -->
+    <section class="card" id="reportResults" style="display:none;">
+        <div class="report-header">
+            <h3>Resultados</h3>
+            <div class="export-buttons">
+                <button class="btn btn-outline btn-sm" id="exportCsvBtn">📥 Exportar CSV</button>
+                <button class="btn btn-outline btn-sm" id="exportPdfBtn">📄 Exportar PDF</button>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="report-summary" id="reportSummary">
+            <div class="report-stat">
+                <span class="stat-label">Ingreso Total</span>
+                <span class="stat-value" id="rptIncome">$0.00</span>
+            </div>
+            <div class="report-stat">
+                <span class="stat-label">Total Gastos</span>
+                <span class="stat-value" id="rptExpenses">$0.00</span>
+            </div>
+            <div class="report-stat">
+                <span class="stat-label">Ganancia Neta</span>
+                <span class="stat-value" id="rptProfit">$0.00</span>
+            </div>
+            <div class="report-stat">
+                <span class="stat-label">Tendencia</span>
+                <span class="stat-value" id="rptTrend">—</span>
+            </div>
+        </div>
+
+        <!-- Grouped Data -->
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Ingreso</th>
+                        <th>Gastos</th>
+                        <th>Ganancia Neta</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Comparison Mode -->
+    <section class="card">
+        <h3>Comparar Períodos</h3>
+        <form id="compareForm" class="form-grid" novalidate>
+            <div class="form-group">
+                <label for="p1From">Período 1 - Desde</label>
+                <input type="date" id="p1From" name="period1_from" required>
+            </div>
+            <div class="form-group">
+                <label for="p1To">Período 1 - Hasta</label>
+                <input type="date" id="p1To" name="period1_to" required>
+            </div>
+            <div class="form-group">
+                <label for="p2From">Período 2 - Desde</label>
+                <input type="date" id="p2From" name="period2_from" required>
+            </div>
+            <div class="form-group">
+                <label for="p2To">Período 2 - Hasta</label>
+                <input type="date" id="p2To" name="period2_to" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Comparar</button>
+        </form>
+    </section>
+
+    <!-- Comparison Results -->
+    <section class="card" id="compareResults" style="display:none;">
+        <h3>Comparación</h3>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Período 1</th>
+                        <th>Período 2</th>
+                        <th>Diferencia</th>
+                        <th>% Cambio</th>
+                    </tr>
+                </thead>
+                <tbody id="compareTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

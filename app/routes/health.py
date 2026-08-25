@@ -4,9 +4,15 @@ from flask import Blueprint, jsonify
 health_bp = Blueprint('health', __name__)
 
 
-@health_bp.route('/')
-def landing():
-    """Landing page with API info."""
+@health_bp.route('/health')
+def health_check():
+    """Health check for Railway deployment."""
+    return jsonify({'status': 'healthy', 'service': 'gestion-financiera-comercial'}), 200
+
+
+@health_bp.route('/api/info')
+def api_info():
+    """API info endpoint (previously at /)."""
     return jsonify({
         'service': 'Gestión Financiera Comercial',
         'version': '1.0.0',
@@ -21,9 +27,3 @@ def landing():
             'ml_prediction': 'GET /api/ml/prediction?category=',
         }
     }), 200
-
-
-@health_bp.route('/health')
-def health_check():
-    """Health check for Railway deployment."""
-    return jsonify({'status': 'healthy', 'service': 'gestion-financiera-comercial'}), 200
