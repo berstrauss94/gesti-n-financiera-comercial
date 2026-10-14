@@ -243,6 +243,26 @@ def check_session():
             }
         }), 401
 
+    # Resolver el negocio activo de la sesión (si existe y sigue siendo válido)
+    active_business = None
+    active_business_id = session.get('active_business_id')
+    if active_business_id is not None:
+        from app.models import Business
+        biz = Business.query.filter_by(
+            id=active_business_id,
+            owner_id=current_user.id,
+            is_active=True,
+        ).first()
+        if biz is not None:
+            active_business = {
+                'id': biz.id,
+                'name': biz.name,
+                'business_type': biz.business_type,
+            }
+        else:
+            # El negocio activo ya no es válido: limpiar
+            session.pop('active_business_id', None)
+
     return jsonify({
         'session': {
             'active': True,
@@ -250,7 +270,8 @@ def check_session():
                 'id': current_user.id,
                 'username': current_user.username,
                 'email': current_user.email,
-            }
+            },
+            'active_business': active_business,
         }
     }), 200
 

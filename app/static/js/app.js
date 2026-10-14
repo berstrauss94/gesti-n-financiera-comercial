@@ -133,13 +133,18 @@ const App = {
                 return;
             }
 
-            // Try to check if we have an active business by making a test call
+            // Mostrar el negocio ACTIVO real de la sesión (no siempre el primero)
             const sessionResp = await this.fetch('/api/auth/session');
             if (sessionResp && sessionResp.ok) {
-                // We're authenticated. The active business is in session server-side.
-                // Show the first business or try to get current from a heatmap call
-                nameEl.textContent = businesses[0].name;
-                nameEl.dataset.businessId = businesses[0].id;
+                const sdata = await sessionResp.json();
+                const active = sdata.session && sdata.session.active_business;
+                if (active) {
+                    nameEl.textContent = active.name;
+                    nameEl.dataset.businessId = active.id;
+                } else {
+                    // Autenticado pero sin negocio activo: invitar a seleccionar
+                    nameEl.textContent = 'Seleccionar negocio →';
+                }
             }
         } catch (e) {
             nameEl.textContent = 'Error';

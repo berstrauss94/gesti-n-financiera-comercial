@@ -2,9 +2,31 @@
  * Dashboard page logic.
  */
 document.addEventListener('DOMContentLoaded', () => {
+    initDashboard();
+});
+
+async function initDashboard() {
+    // Fuente de verdad: ¿hay un negocio activo en la sesión?
+    let hasActiveBusiness = false;
+    try {
+        const sresp = await App.fetch('/api/auth/session');
+        if (sresp && sresp.ok) {
+            const sdata = await sresp.json();
+            hasActiveBusiness = !!(sdata.session && sdata.session.active_business);
+        }
+    } catch (e) { /* ignore */ }
+
+    if (!hasActiveBusiness) {
+        // Solo si realmente no hay negocio activo, abrir el modal para elegir/crear
+        const modal = document.getElementById('businessModal');
+        if (modal) modal.classList.add('show');
+        return;
+    }
+
+    // Hay negocio activo: cargar datos normalmente
     loadDashboardData();
     loadDashboardHeatmap();
-});
+}
 
 async function loadDashboardData() {
     const fromDate = App.firstOfMonth();
@@ -13,14 +35,7 @@ async function loadDashboardData() {
     try {
         const resp = await App.fetch(`/api/reports?granularity=monthly&from=${fromDate}&to=${toDate}`);
 
-        if (!resp || resp.status === 403) {
-            // No business selected - show modal
-            const modal = document.getElementById('businessModal');
-            if (modal) modal.classList.add('show');
-            return;
-        }
-
-        if (!resp.ok) return;
+        if (!resp || !resp.ok) return;
 
         const data = await resp.json();
         const summary = data.report?.summary || {};
