@@ -14,6 +14,12 @@
         <button class="tab" data-tab="umbrales">Umbrales <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Configura los márgenes de color de cada concepto o deja que el agente aplique los valores recomendados por reglas financieras establecidas.">?</span></button>
     </div>
 
+    <!-- Gestión de conceptos de personal (Salarios / Retiros) -->
+    <section class="card">
+        <h4 class="concept-title" style="margin-top:0;">Conceptos de personal <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Activa o quita Salarios y Retiros según tu negocio. Un hogar normalmente no los usa; un comercio con empleados sí. Al quitarlos, sus pestañas desaparecen.">?</span></h4>
+        <div id="specialConcepts"></div>
+    </section>
+
     <!-- Salarios Tab -->
     <section class="tab-content active" id="tab-salarios">
         <div class="card">
@@ -119,7 +125,10 @@
             </form>
             <div class="form-error" id="variableError" role="alert"></div>
             <div class="form-success" id="variableSuccess" role="status"></div>
-            <div class="add-concept" id="addConceptVariable"></div>
+            <div class="add-concept">
+                <h4 class="concept-title">Conceptos activos <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Estos son los gastos variables que aplican a tu negocio. Quita con ✕ los que no uses o agrega los que necesites.">?</span></h4>
+                <div id="conceptManagerVariable"></div>
+            </div>
         </div>
         <div class="card">
             <h3 class="title-with-help"><span>Gastos Variables Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de gastos variables ya cargados, con fecha, categoría, monto y descripción.">?</span></h3>
@@ -167,7 +176,10 @@
             </form>
             <div class="form-error" id="operatingError" role="alert"></div>
             <div class="form-success" id="operatingSuccess" role="status"></div>
-            <div class="add-concept" id="addConceptOperating"></div>
+            <div class="add-concept">
+                <h4 class="concept-title">Conceptos activos <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Estos son los costos operativos fijos que aplican a tu negocio. Quita con ✕ los que no uses o agrega los que necesites.">?</span></h4>
+                <div id="conceptManagerOperating"></div>
+            </div>
         </div>
         <div class="card">
             <h3 class="title-with-help"><span>Costos Operativos Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de costos operativos fijos ya cargados, con mes, categoría, monto y descripción.">?</span></h3>

@@ -32,16 +32,32 @@ async function loadCategories() {
         const data = await resp.json();
         const active = data.active || [];
         const available = data.available || [];
+        const activeKeys = new Set(active.map(c => c.key));
+
+        // Mostrar/ocultar las pestañas de Salarios y Retiros según estén activas
+        toggleTab('salarios', activeKeys.has('salarios'));
+        toggleTab('retiros', activeKeys.has('retiros_dueno'));
 
         // Rellenar los selects de categoría con las activas de cada grupo
         fillCategorySelect('varCategory', active.filter(c => c.group === 'variable'));
         fillCategorySelect('opCategory', active.filter(c => c.group === 'operativo'));
 
-        // Panel para agregar conceptos extra (de cualquier grupo que pueda cargarse)
-        renderAddConceptPanels(available);
+        // Paneles para agregar/quitar conceptos
+        renderConceptManager('conceptManagerVariable', 'variable', active, available);
+        renderConceptManager('conceptManagerOperating', 'operativo', active, available);
+        renderSpecialConceptControls(activeKeys, available);
     } catch (e) {
         // silencioso: si falla, quedan las opciones por defecto del HTML
     }
+}
+
+// Muestra u oculta una pestaña (y su contenido) por data-tab
+function toggleTab(tabName, show) {
+    const tabBtn = document.querySelector(`.tab[data-tab="${tabName}"]`);
+    const tabContent = document.getElementById('tab-' + tabName);
+    const display = show ? '' : 'none';
+    if (tabBtn) tabBtn.style.display = display;
+    if (tabContent && !show) tabContent.classList.remove('active');
 }
 
 function fillCategorySelect(selectId, categories) {
@@ -56,43 +72,100 @@ function fillCategorySelect(selectId, categories) {
     if (current) select.value = current;
 }
 
-function renderAddConceptPanels(available) {
-    // Variables y operativos disponibles para activar
-    const varAvail = available.filter(c => c.group === 'variable');
-    const opAvail = available.filter(c => c.group === 'operativo');
-    renderAddConcept('addConceptVariable', varAvail);
-    renderAddConcept('addConceptOperating', opAvail);
-}
-
-function renderAddConcept(containerId, categories) {
+// Gestor de conceptos de un grupo: lista las activas con botón "quitar"
+// y un selector para agregar las disponibles.
+function renderConceptManager(containerId, group, active, available) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    if (categories.length === 0) {
-        container.innerHTML = '<small class="form-hint">No hay más conceptos para agregar en este grupo.</small>';
-        return;
+
+    const activeGroup = active.filter(c => c.group === group);
+    const availGroup = available.filter(c => c.group === group);
+
+    let html = '<div class="concept-manager">';
+
+    // Chips de categorías activas con botón quitar
+    html += '<div class="concept-chips">';
+    if (activeGroup.length === 0) {
+        html += '<small class="form-hint">No hay conceptos activos en este grupo.</small>';
+    } else {
+        activeGroup.forEach(c => {
+            html += `<span class="concept-chip">${c.label}`
+                + `<button class="concept-remove" type="button" data-cat="${c.key}" title="Quitar concepto">✕</button></span>`;
+        });
     }
-    let html = '<div class="add-concept-row"><select class="input-field add-concept-select">';
-    html += '<option value="">+ Agregar concepto...</option>';
-    categories.forEach(c => {
-        html += `<option value="${c.key}">${c.label}</option>`;
-    });
-    html += '</select><button class="btn btn-outline btn-sm add-concept-btn" type="button">Agregar</button></div>';
+    html += '</div>';
+
+    // Selector para agregar
+    if (availGroup.length > 0) {
+        html += '<div class="add-concept-row" style="margin-top:0.6rem;">'
+            + '<select class="input-field add-concept-select"><option value="">+ Agregar concepto...</option>';
+        availGroup.forEach(c => { html += `<option value="${c.key}">${c.label}</option>`; });
+        html += '</select><button class="btn btn-outline btn-sm add-concept-btn" type="button">Agregar</button></div>';
+    }
+    html += '</div>';
     container.innerHTML = html;
 
-    const select = container.querySelector('.add-concept-select');
-    const btn = container.querySelector('.add-concept-btn');
-    btn.addEventListener('click', async () => {
-        const category = select.value;
-        if (!category) return;
-        const resp = await App.fetch('/api/categories', {
-            method: 'POST',
-            body: JSON.stringify({ category }),
+    // Handlers de quitar
+    container.querySelectorAll('.concept-remove').forEach(btn => {
+        btn.addEventListener('click', () => removeConcept(btn.dataset.cat));
+    });
+    // Handler de agregar
+    const addBtn = container.querySelector('.add-concept-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            const sel = container.querySelector('.add-concept-select');
+            if (sel && sel.value) addConcept(sel.value);
         });
-        if (resp && (resp.ok || resp.status === 200)) {
-            // Recargar selects y paneles
-            loadCategories();
+    }
+}
+
+// Controles para Salarios y Retiros (que no son categorías de gasto variable/operativo)
+function renderSpecialConceptControls(activeKeys, available) {
+    const container = document.getElementById('specialConcepts');
+    if (!container) return;
+
+    const specials = [
+        { key: 'salarios', label: 'Salarios de empleados' },
+        { key: 'retiros_dueno', label: 'Retiros del dueño' },
+    ];
+
+    let html = '<div class="concept-chips">';
+    specials.forEach(s => {
+        if (activeKeys.has(s.key)) {
+            html += `<span class="concept-chip">${s.label}`
+                + `<button class="concept-remove" type="button" data-cat="${s.key}" title="Quitar">✕</button></span>`;
+        } else {
+            html += `<button class="btn btn-outline btn-sm" type="button" data-add="${s.key}" style="margin-right:0.4rem;">+ ${s.label}</button>`;
         }
     });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.concept-remove').forEach(btn => {
+        btn.addEventListener('click', () => removeConcept(btn.dataset.cat));
+    });
+    container.querySelectorAll('[data-add]').forEach(btn => {
+        btn.addEventListener('click', () => addConcept(btn.dataset.add));
+    });
+}
+
+async function addConcept(category) {
+    if (!category) return;
+    const resp = await App.fetch('/api/categories', {
+        method: 'POST',
+        body: JSON.stringify({ category }),
+    });
+    if (resp && (resp.ok || resp.status === 200)) {
+        loadCategories();
+    }
+}
+
+async function removeConcept(category) {
+    if (!category) return;
+    const resp = await App.fetch(`/api/categories/${category}`, { method: 'DELETE' });
+    if (resp && resp.ok) {
+        loadCategories();
+    }
 }
 
 // === Tabs ===

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initDashboard() {
-    // Fuente de verdad: ¿hay un negocio activo en la sesión?
+    // 1) ¿Hay un negocio activo en la sesión?
     let hasActiveBusiness = false;
     try {
         const sresp = await App.fetch('/api/auth/session');
@@ -16,16 +16,39 @@ async function initDashboard() {
         }
     } catch (e) { /* ignore */ }
 
-    if (!hasActiveBusiness) {
-        // Solo si realmente no hay negocio activo, abrir el modal para elegir/crear
-        const modal = document.getElementById('businessModal');
-        if (modal) modal.classList.add('show');
+    if (hasActiveBusiness) {
+        // Caso normal: cargar datos sin interrumpir
+        loadDashboardData();
+        loadDashboardHeatmap();
         return;
     }
 
-    // Hay negocio activo: cargar datos normalmente
-    loadDashboardData();
-    loadDashboardHeatmap();
+    // 2) No hay negocio activo. ¿El usuario tiene negocios creados?
+    let businesses = [];
+    try {
+        const bresp = await App.fetch('/api/businesses');
+        if (bresp && bresp.ok) {
+            businesses = (await bresp.json()).businesses || [];
+        }
+    } catch (e) { /* ignore */ }
+
+    if (businesses.length > 0) {
+        // Tiene negocios pero ninguno activo: auto-seleccionar el primero
+        // en silencio (no abrir el modal) y cargar el dashboard.
+        try {
+            await App.fetch(`/api/businesses/${businesses[0].id}/select`, { method: 'POST' });
+            const nameEl = document.getElementById('activeBusinessName');
+            if (nameEl) nameEl.textContent = businesses[0].name;
+        } catch (e) { /* ignore */ }
+        loadDashboardData();
+        loadDashboardHeatmap();
+        return;
+    }
+
+    // 3) Usuario sin ningún negocio: aquí sí tiene sentido abrir el modal
+    //    para que cree el primero.
+    const modal = document.getElementById('businessModal');
+    if (modal) modal.classList.add('show');
 }
 
 async function loadDashboardData() {

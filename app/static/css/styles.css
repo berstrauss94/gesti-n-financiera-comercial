@@ -947,3 +947,45 @@ a:hover {
     flex: 1;
     min-width: 180px;
 }
+
+/* === Gestor de conceptos (activar/quitar categorías) === */
+.concept-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.concept-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+.concept-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.3rem 0.5rem 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+.concept-remove {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0 0.2rem;
+    border-radius: 50%;
+    transition: all var(--transition);
+}
+.concept-remove:hover {
+    color: #fff;
+    background: var(--red);
+}
