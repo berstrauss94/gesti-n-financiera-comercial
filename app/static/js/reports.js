@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', () => {
         await comparePeriods();
     });
 
+    // Enviar informe por email
+    const emailBtn = document.getElementById('emailReportBtn');
+    if (emailBtn) {
+        emailBtn.addEventListener('click', async () => {
+            const msg = document.getElementById('emailReportMsg');
+            emailBtn.disabled = true;
+            msg.textContent = 'Enviando...';
+            msg.style.color = 'var(--text-muted)';
+            try {
+                const resp = await App.fetch('/api/reports/email', { method: 'POST' });
+                const data = await resp.json();
+                if (resp.ok) {
+                    msg.textContent = '✓ ' + (data.message || 'Informe enviado');
+                    msg.style.color = 'var(--green)';
+                } else {
+                    msg.textContent = '✗ ' + (data.error?.message || 'No se pudo enviar');
+                    msg.style.color = 'var(--red)';
+                }
+            } catch (err) {
+                msg.textContent = '✗ Error de conexión';
+                msg.style.color = 'var(--red)';
+            } finally {
+                emailBtn.disabled = false;
+            }
+        });
+    }
+
     // Export buttons
     document.getElementById('exportCsvBtn').addEventListener('click', () => exportReport('csv'));
     document.getElementById('exportPdfBtn').addEventListener('click', () => exportReport('pdf'));

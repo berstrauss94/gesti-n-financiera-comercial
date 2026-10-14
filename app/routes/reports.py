@@ -607,3 +607,53 @@ def _export_pdf(data, summary, date_from, date_to):
         f'attachment; filename=reporte_{date_from.isoformat()}_{date_to.isoformat()}.pdf'
     )
     return response
+
+
+@reports_bp.route('/email', methods=['POST'])
+@require_business
+def email_report():
+    """Genera y envía por email el informe del negocio activo al usuario actual.
+
+    Botón "Enviarme el informe ahora". Usa el email del usuario autenticado.
+    """
+    from flask_login import current_user
+    from app.services.report_service import build_report_for_business
+    from app.services.email_service import send_email, is_configured
+
+    business_id = session.get('active_business_id')
+
+    if not is_configured():
+        return jsonify({
+            'error': {
+                'code': 'EMAIL_NOT_CONFIGURED',
+                'message': (
+                    'El envío de email no está configurado en el servidor. '
+                    'Configura las variables SMTP_USER y SMTP_PASSWORD.'
+                ),
+            }
+        }), 503
+
+    result = build_report_for_business(business_id)
+    if result is None:
+        return jsonify({
+            'error': {'code': 'BUSINESS_NOT_FOUND', 'message': 'Negocio no encontrado'}
+        }), 404
+
+    business, report, html = result
+    subject = f"FinanzApp — Informe de {business.name} ({report['period_label']})"
+
+    send_result = send_email(current_user.email, subject, html)
+
+    if send_result['status'] == 'sent':
+        return jsonify({
+            'message': f'Informe enviado a {current_user.email}',
+            'to': current_user.email,
+        }), 200
+
+    code = 503 if send_result['status'] == 'not_configured' else 500
+    return jsonify({
+        'error': {
+            'code': 'EMAIL_SEND_FAILED',
+            'message': send_result.get('message', 'No se pudo enviar el informe'),
+        }
+    }), code
