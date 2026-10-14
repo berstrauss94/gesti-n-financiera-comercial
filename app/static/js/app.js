@@ -257,12 +257,44 @@ async function loadBusinessList() {
     const TYPE_LABELS = {
         comercio: 'Comercio', hogar: 'Hogar', expansion: 'Expansión', servicios: 'Servicios',
     };
+    const typeOptions = (sel) => Object.entries(TYPE_LABELS)
+        .map(([v, l]) => `<option value="${v}" ${v === sel ? 'selected' : ''}>${l}</option>`).join('');
+
     list.innerHTML = businesses.map(b => `
         <div class="business-item" data-id="${b.id}">
-            <span>${b.name} <small style="color:var(--text-muted)">(${TYPE_LABELS[b.business_type] || b.business_type || 'Comercio'})</small></span>
-            <button class="btn btn-sm btn-outline" onclick="selectBusiness(${b.id}, '${b.name}')">Seleccionar</button>
+            <div style="flex:1;min-width:0;">
+                <span>${b.name} <small style="color:var(--text-muted)">(${TYPE_LABELS[b.business_type] || b.business_type || 'Comercio'})</small></span>
+                <div class="edit-type-row" id="editType-${b.id}" style="display:none;margin-top:0.4rem;gap:0.4rem;align-items:center;">
+                    <select class="input-field edit-type-select" style="padding:0.4rem;">${typeOptions(b.business_type)}</select>
+                    <button class="btn btn-sm btn-primary" onclick="saveBusinessType(${b.id})">Guardar</button>
+                </div>
+            </div>
+            <div style="display:flex;gap:0.4rem;">
+                <button class="btn btn-sm btn-outline" onclick="toggleEditType(${b.id})" title="Cambiar tipo de negocio">⚙️</button>
+                <button class="btn btn-sm btn-outline" onclick="selectBusiness(${b.id}, '${b.name.replace(/'/g, "\\'")}')">Seleccionar</button>
+            </div>
         </div>
     `).join('');
+}
+
+function toggleEditType(id) {
+    const row = document.getElementById(`editType-${id}`);
+    if (row) row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function saveBusinessType(id) {
+    const row = document.getElementById(`editType-${id}`);
+    const select = row ? row.querySelector('.edit-type-select') : null;
+    if (!select) return;
+    const resp = await App.fetch(`/api/businesses/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ business_type: select.value }),
+    });
+    if (resp && resp.ok) {
+        await loadBusinessList();
+        // Si es el negocio activo, recargar para refrescar categorías/semáforo
+        window.location.reload();
+    }
 }
 
 async function selectBusiness(id, name) {

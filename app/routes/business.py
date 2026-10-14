@@ -133,13 +133,19 @@ def list_businesses():
 @business_bp.route('/<int:business_id>', methods=['PUT'])
 @login_required
 def update_business(business_id):
-    """Update a business name.
+    """Update a business name and/or its profile (business_type).
 
     Only the owner can update their own businesses.
 
-    Request body:
-        {"name": "New Business Name"}
+    Request body (ambos campos opcionales, al menos uno requerido):
+        {"name": "New Business Name", "business_type": "hogar"}
+
+    Cambiar el perfil NO borra categorías ni datos existentes: solo actualiza
+    el business_type y SIEMBRA las categorías del nuevo perfil que falten.
+    Las categorías de más quedan como conceptos extra que se pueden quitar.
     """
+    from app.catalog import is_valid_profile
+
     business = Business.query.filter_by(
         id=business_id,
         owner_id=current_user.id,
@@ -154,27 +160,50 @@ def update_business(business_id):
             }
         }), 403
 
-    data = request.get_json(silent=True)
-    if not data or not data.get('name', '').strip():
+    data = request.get_json(silent=True) or {}
+    new_name = (data.get('name') or '').strip()
+    new_type = (data.get('business_type') or '').strip()
+
+    if not new_name and not new_type:
         return jsonify({
             'error': {
                 'code': 'VALIDATION_INVALID_INPUT',
-                'message': 'El nombre del negocio es requerido',
-                'field': 'name',
+                'message': 'Debe indicar un nombre o un tipo de negocio',
             }
         }), 400
 
-    business.name = data['name'].strip()
-    db.session.commit()
+    # Validar tipo si se envió
+    if new_type and not is_valid_profile(new_type):
+        return jsonify({
+            'error': {
+                'code': 'VALIDATION_INVALID_INPUT',
+                'message': 'Tipo de negocio no válido',
+                'field': 'business_type',
+            }
+        }), 400
+
+    if new_name:
+        business.name = new_name
+
+    seeded = []
+    if new_type and new_type != business.business_type:
+        business.business_type = new_type
+        db.session.commit()
+        # Sembrar categorías del nuevo perfil que aún no existan (no borra nada)
+        seeded = [c.category for c in seed_default_thresholds(business.id, business_type=new_type)]
+    else:
+        db.session.commit()
 
     return jsonify({
         'business': {
             'id': business.id,
             'name': business.name,
+            'business_type': business.business_type,
             'owner_id': business.owner_id,
             'is_active': business.is_active,
             'created_at': business.created_at.isoformat() if business.created_at else None,
-        }
+        },
+        'added_categories': seeded,
     }), 200
 
 
