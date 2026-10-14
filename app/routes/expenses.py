@@ -17,6 +17,8 @@ from app.schemas import (
     VALIDATION_INVALID_CATEGORY,
 )
 
+from app.models.threshold_config import ThresholdConfig
+
 expenses_bp = Blueprint('expenses', __name__)
 
 # Schema instances
@@ -24,6 +26,37 @@ _salary_schema = SalarySchema()
 _withdrawal_schema = OwnerWithdrawalSchema()
 _variable_expense_schema = VariableExpenseSchema()
 _operating_cost_schema = OperatingCostSchema()
+
+
+def _category_active(business_id, category):
+    """True si la categoría puede cargarse en el negocio.
+
+    - Si el negocio tiene categorías configuradas (ThresholdConfig), la categoría
+      debe estar entre ellas (perfil + conceptos extra activados).
+    - Si el negocio no tiene ninguna configurada (negocio legacy o creado sin
+      sembrado), se permite cualquier categoría válida del schema, preservando
+      el comportamiento histórico.
+    """
+    has_any = ThresholdConfig.query.filter_by(business_id=business_id).first() is not None
+    if not has_any:
+        return True
+    return ThresholdConfig.query.filter_by(
+        business_id=business_id, category=category
+    ).first() is not None
+
+
+def _category_not_active_response(category):
+    """Respuesta 400 cuando la categoría no está activa en el negocio."""
+    return jsonify({
+        'error': {
+            'code': 'CATEGORY_NOT_ACTIVE',
+            'message': (
+                f'La categoría "{category}" no está activa en este negocio. '
+                'Actívala en Gastos con "Agregar concepto" antes de cargarla.'
+            ),
+            'field': 'category',
+        }
+    }), 400
 
 
 # --- Employee Salaries ---
@@ -331,6 +364,10 @@ def create_variable_expense():
 
     business_id = session.get('active_business_id')
 
+    # La categoría debe estar activa en el negocio (perfil o concepto extra)
+    if not _category_active(business_id, validated['category']):
+        return _category_not_active_response(validated['category'])
+
     expense = VariableExpense(
         business_id=business_id,
         category=validated['category'],
@@ -492,6 +529,10 @@ def create_operating_cost():
         }), 400
 
     business_id = session.get('active_business_id')
+
+    # La categoría debe estar activa en el negocio (perfil o concepto extra)
+    if not _category_active(business_id, validated['category']):
+        return _category_not_active_response(validated['category'])
 
     cost = OperatingCost(
         business_id=business_id,

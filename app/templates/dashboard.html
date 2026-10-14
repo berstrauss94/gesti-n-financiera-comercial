@@ -7,10 +7,25 @@
     <!-- Business selector modal -->
     <div class="modal" id="businessModal">
         <div class="modal-content">
-            <h3>Seleccionar Negocio</h3>
+            <h3 class="title-with-help"><span>Mis Negocios</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Lista de tus negocios. Selecciona uno para trabajar con él o crea uno nuevo eligiendo su tipo de perfil.">?</span></h3>
             <div id="businessList" class="business-list"></div>
-            <div class="modal-actions">
+
+            <h3 class="title-with-help" style="margin-top:1rem;"><span>Adherir Nuevo Negocio</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="El tipo de negocio define qué categorías de gasto se muestran por defecto. Un hogar no maneja la misma información que un comercio en expansión.">?</span></h3>
+            <div class="form-group">
+                <label for="newBusinessName">Nombre</label>
                 <input type="text" id="newBusinessName" placeholder="Nombre del nuevo negocio" class="input-field">
+            </div>
+            <div class="form-group">
+                <label for="newBusinessType">Tipo de negocio (perfil)</label>
+                <select id="newBusinessType" class="input-field">
+                    <option value="comercio">Comercio / Retail</option>
+                    <option value="hogar">Hogar / Finanzas personales</option>
+                    <option value="expansion">Negocio en expansión / Pyme</option>
+                    <option value="servicios">Servicios / Profesional independiente</option>
+                </select>
+                <small class="form-hint" id="businessTypeHint">Comercio: salarios, mercadería, 8 gastos variables y costos operativos completos.</small>
+            </div>
+            <div class="modal-actions">
                 <button class="btn btn-primary btn-sm" id="createBusinessBtn">Crear Negocio</button>
             </div>
             <button class="btn btn-outline btn-sm modal-close" id="closeBusinessModal">Cerrar</button>
@@ -22,7 +37,7 @@
         <div class="card summary-card income-card">
             <div class="card-icon">💵</div>
             <div class="card-body">
-                <h3>Ingreso Bruto</h3>
+                <h3>Ingreso Bruto <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Suma de todas las ventas (ingreso bruto) registradas en el mes en curso. Es la base para calcular los porcentajes de gasto y la ganancia neta.">?</span></h3>
                 <p class="card-value" id="totalIncome">$0.00</p>
                 <small>Último mes</small>
             </div>
@@ -30,7 +45,7 @@
         <div class="card summary-card profit-card">
             <div class="card-icon">📈</div>
             <div class="card-body">
-                <h3>Ganancia Neta</h3>
+                <h3>Ganancia Neta <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Ingreso bruto menos todos los gastos (salarios, retiros, gastos variables y costos operativos) del mes. Verde si es positiva, roja si es negativa.">?</span></h3>
                 <p class="card-value" id="netProfit">$0.00</p>
                 <small>Último mes</small>
             </div>
@@ -38,7 +53,7 @@
         <div class="card summary-card expense-card">
             <div class="card-icon">💸</div>
             <div class="card-body">
-                <h3>Total Gastos</h3>
+                <h3>Total Gastos <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Suma de todos los egresos del mes: salarios, retiros del dueño, gastos variables y costos operativos fijos.">?</span></h3>
                 <p class="card-value" id="totalExpenses">$0.00</p>
                 <small>Último mes</small>
             </div>
@@ -47,7 +62,7 @@
 
     <!-- Heatmap Preview -->
     <section class="card heatmap-preview">
-        <h3>🔥 Semáforo Financiero <small>(hoy)</small></h3>
+        <h3 class="title-with-help"><span>🔥 Semáforo Financiero <small>(hoy)</small></span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Vista rápida del día de hoy: cada gasto se muestra como porcentaje del ingreso del día y con un color (verde a crítico). Carga el ingreso de hoy para verlo con datos.">?</span></h3>
         <div class="heatmap-grid" id="dashboardHeatmap">
             <p class="loading-text">Cargando indicadores...</p>
         </div>
@@ -56,21 +71,21 @@
 
     <!-- Quick Links -->
     <section class="quick-links">
-        <h3>Acceso Rápido</h3>
+        <h3 class="title-with-help"><span>Acceso Rápido</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Atajos a las acciones más frecuentes. Cada tarjeta te lleva directamente a la sección correspondiente.">?</span></h3>
         <div class="links-grid">
-            <a href="{{ url_for('frontend.income') }}" class="quick-link-card">
+            <a href="{{ url_for('frontend.income') }}" class="quick-link-card" title="Ir a registrar el ingreso bruto del día">
                 <span>💵</span>
                 <p>Registrar Ingreso</p>
             </a>
-            <a href="{{ url_for('frontend.expenses') }}" class="quick-link-card">
+            <a href="{{ url_for('frontend.expenses') }}" class="quick-link-card" title="Ir a cargar salarios, retiros, gastos variables o costos operativos">
                 <span>💸</span>
                 <p>Registrar Gasto</p>
             </a>
-            <a href="{{ url_for('frontend.heatmap') }}" class="quick-link-card">
+            <a href="{{ url_for('frontend.heatmap') }}" class="quick-link-card" title="Ver el semáforo de calor completo por categoría">
                 <span>🔥</span>
                 <p>Ver Heatmap</p>
             </a>
-            <a href="{{ url_for('frontend.reports') }}" class="quick-link-card">
+            <a href="{{ url_for('frontend.reports') }}" class="quick-link-card" title="Generar y exportar reportes por período">
                 <span>📈</span>
                 <p>Generar Reporte</p>
             </a>

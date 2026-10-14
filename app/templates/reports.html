@@ -6,10 +6,10 @@
 <div class="page-reports">
     <!-- Report Controls -->
     <section class="card report-controls">
-        <h3>Generar Reporte</h3>
+        <h3 class="title-with-help"><span>Generar Reporte</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Produce un informe de ingresos, gastos y ganancia neta en el rango de fechas elegido, agrupado por el período que selecciones.">?</span></h3>
         <form id="reportForm" class="form-grid" novalidate>
             <div class="form-group">
-                <label for="reportGranularity">Período</label>
+                <label for="reportGranularity">Período <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Nivel de agrupación de los datos: diario, semanal, mensual, trimestral, semestral o anual.">?</span></label>
                 <select id="reportGranularity" name="granularity">
                     <option value="daily">Diario</option>
                     <option value="weekly">Semanal</option>
@@ -28,7 +28,7 @@
                 <input type="date" id="reportTo" name="to" required>
             </div>
             <div class="form-group">
-                <label for="reportFilter">Filtro texto (opcional)</label>
+                <label for="reportFilter">Filtro texto (opcional) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Filtra los movimientos que contengan este texto en su categoría, descripción o notas. Déjalo vacío para incluir todo.">?</span></label>
                 <input type="text" id="reportFilter" name="filter" placeholder="Buscar en categoría/descripción">
             </div>
             <button type="submit" class="btn btn-primary">Generar Reporte</button>
@@ -38,29 +38,29 @@
     <!-- Report Results -->
     <section class="card" id="reportResults" style="display:none;">
         <div class="report-header">
-            <h3>Resultados</h3>
+            <h3 class="title-with-help"><span>Resultados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Resumen del reporte generado y el detalle agrupado por período. Puedes exportarlo con los botones de la derecha.">?</span></h3>
             <div class="export-buttons">
-                <button class="btn btn-outline btn-sm" id="exportCsvBtn">📥 Exportar CSV</button>
-                <button class="btn btn-outline btn-sm" id="exportPdfBtn">📄 Exportar PDF</button>
+                <button class="btn btn-outline btn-sm" id="exportCsvBtn" title="Descarga los datos del reporte en formato CSV (hoja de cálculo)">📥 Exportar CSV</button>
+                <button class="btn btn-outline btn-sm" id="exportPdfBtn" title="Descarga el reporte en formato PDF listo para imprimir o compartir">📄 Exportar PDF</button>
             </div>
         </div>
 
         <!-- Summary -->
         <div class="report-summary" id="reportSummary">
             <div class="report-stat">
-                <span class="stat-label">Ingreso Total</span>
+                <span class="stat-label">Ingreso Total <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Suma de todos los ingresos brutos del rango seleccionado.">?</span></span>
                 <span class="stat-value" id="rptIncome">$0.00</span>
             </div>
             <div class="report-stat">
-                <span class="stat-label">Total Gastos</span>
+                <span class="stat-label">Total Gastos <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Suma de todos los egresos del rango: salarios, retiros, gastos variables y costos operativos.">?</span></span>
                 <span class="stat-value" id="rptExpenses">$0.00</span>
             </div>
             <div class="report-stat">
-                <span class="stat-label">Ganancia Neta</span>
+                <span class="stat-label">Ganancia Neta <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Ingreso total menos total de gastos del rango. Es el resultado financiero del período.">?</span></span>
                 <span class="stat-value" id="rptProfit">$0.00</span>
             </div>
             <div class="report-stat">
-                <span class="stat-label">Tendencia</span>
+                <span class="stat-label">Tendencia <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Dirección de la ganancia neta a lo largo del período (al alza, a la baja o estable).">?</span></span>
                 <span class="stat-value" id="rptTrend">—</span>
             </div>
         </div>
@@ -83,7 +83,7 @@
 
     <!-- Comparison Mode -->
     <section class="card">
-        <h3>Comparar Períodos</h3>
+        <h3 class="title-with-help"><span>Comparar Períodos</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Enfrenta dos rangos de fechas y muestra la diferencia absoluta y el porcentaje de cambio en cada métrica. Útil para comparar meses o temporadas.">?</span></h3>
         <form id="compareForm" class="form-grid" novalidate>
             <div class="form-group">
                 <label for="p1From">Período 1 - Desde</label>

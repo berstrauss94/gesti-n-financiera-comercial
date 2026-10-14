@@ -8,7 +8,7 @@
     <section class="card heatmap-controls">
         <div class="form-inline">
             <div class="form-group">
-                <label for="heatmapDate">Fecha</label>
+                <label for="heatmapDate">Fecha <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Día que quieres analizar. El semáforo mostrará los gastos de ese día (y los costos operativos de ese mes) como porcentaje del ingreso.">?</span></label>
                 <input type="date" id="heatmapDate" name="date">
             </div>
             <button class="btn btn-primary" id="loadHeatmapBtn">Cargar</button>
@@ -17,7 +17,7 @@
 
     <!-- Net Profit Master Indicator -->
     <section class="card net-profit-master" id="netProfitSection">
-        <h3>Indicador Maestro: Ganancia Neta</h3>
+        <h3 class="title-with-help"><span>Indicador Maestro: Ganancia Neta</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Resumen de la salud financiera del día. A diferencia de los gastos, aquí más alto es mejor: verde ≥20%, amarillo 10-20%, naranja 5-10%, rojo <5% del ingreso.">?</span></h3>
         <div class="master-indicator" id="masterIndicator">
             <span class="indicator-circle" id="masterCircle">—</span>
             <div class="indicator-details">
@@ -30,7 +30,7 @@
 
     <!-- Heatmap Grid -->
     <section class="card">
-        <h3>Indicadores por Categoría</h3>
+        <h3 class="title-with-help"><span>Indicadores por Categoría</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Cada casilla es un tipo de gasto mostrado como porcentaje del ingreso del día y coloreado según su umbral. Para gastos, menor porcentaje es mejor.">?</span></h3>
         <div class="heatmap-full-grid" id="heatmapGrid">
             <p class="loading-text">Seleccione una fecha para cargar el semáforo</p>
         </div>

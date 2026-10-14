@@ -10,6 +10,9 @@ class Business(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # Perfil de negocio: define qué categorías aplican por defecto.
+    # 'comercio' por defecto para mantener el comportamiento previo.
+    business_type = db.Column(db.String(30), nullable=False, default='comercio')
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = db.Column(db.Boolean, default=True)
 

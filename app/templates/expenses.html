@@ -6,31 +6,33 @@
 <div class="page-expenses">
     <!-- Tabs -->
     <div class="tabs">
-        <button class="tab active" data-tab="salarios">Salarios</button>
-        <button class="tab" data-tab="retiros">Retiros</button>
-        <button class="tab" data-tab="variables">Gastos Variables</button>
-        <button class="tab" data-tab="operativos">Costos Operativos</button>
+        <button class="tab active" data-tab="salarios">Salarios <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Sueldos de empleados, cargados por período (inicio y fin). Se consideran gasto en los días que abarca el período.">?</span></button>
+        <button class="tab" data-tab="retiros">Retiros <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Dinero que el dueño retira del negocio para uso personal. Se registra por fecha y se controla con su propio umbral, aparte de los salarios.">?</span></button>
+        <button class="tab" data-tab="variables">Gastos Variables <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Gastos que cambian según la actividad diaria (comisiones, mermas, servicios, insumos, etc.). 8 categorías, cada una con su umbral.">?</span></button>
+        <button class="tab" data-tab="operativos">Costos Operativos <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Costos fijos mensuales (electricidad, agua, internet, monotributo, mercadería, alquiler, contable). Se cargan una vez por mes.">?</span></button>
+        <button class="tab" data-tab="ahorros">Ahorros <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Dinero que apartas para Fondo de Emergencia o Inversión. Aquí el semáforo es invertido: cuanto mayor sea el % del ingreso que ahorras, más verde.">?</span></button>
+        <button class="tab" data-tab="umbrales">Umbrales <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Configura los márgenes de color de cada concepto o deja que el agente aplique los valores recomendados por reglas financieras establecidas.">?</span></button>
     </div>
 
     <!-- Salarios Tab -->
     <section class="tab-content active" id="tab-salarios">
         <div class="card">
-            <h3>Registrar Salario</h3>
+            <h3 class="title-with-help"><span>Registrar Salario</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Da de alta el sueldo de un empleado para un rango de fechas. El monto se reparte como gasto en los días que cubre el período.">?</span></h3>
             <form id="salaryForm" class="form-grid" novalidate>
                 <div class="form-group">
-                    <label for="salEmployeeName">Empleado</label>
+                    <label for="salEmployeeName">Empleado <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Nombre del empleado al que corresponde el sueldo.">?</span></label>
                     <input type="text" id="salEmployeeName" name="employee_name" placeholder="Nombre del empleado" required>
                 </div>
                 <div class="form-group">
-                    <label for="salAmount">Monto ($)</label>
+                    <label for="salAmount">Monto ($) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Importe del salario para el período indicado.">?</span></label>
                     <input type="number" id="salAmount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
                 </div>
                 <div class="form-group">
-                    <label for="salPeriodStart">Período Inicio</label>
+                    <label for="salPeriodStart">Período Inicio <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Primer día que cubre este salario.">?</span></label>
                     <input type="date" id="salPeriodStart" name="period_start" required>
                 </div>
                 <div class="form-group">
-                    <label for="salPeriodEnd">Período Fin</label>
+                    <label for="salPeriodEnd">Período Fin <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Último día que cubre este salario. Debe ser igual o posterior al inicio.">?</span></label>
                     <input type="date" id="salPeriodEnd" name="period_end" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Registrar Salario</button>
@@ -39,7 +41,7 @@
             <div class="form-success" id="salarySuccess" role="status"></div>
         </div>
         <div class="card">
-            <h3>Salarios Registrados</h3>
+            <h3 class="title-with-help"><span>Salarios Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Listado de los salarios ya cargados para el negocio activo, con empleado, monto y período.">?</span></h3>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead><tr><th>Empleado</th><th>Monto</th><th>Período</th></tr></thead>
@@ -52,18 +54,18 @@
     <!-- Retiros Tab -->
     <section class="tab-content" id="tab-retiros">
         <div class="card">
-            <h3>Registrar Retiro del Dueño</h3>
+            <h3 class="title-with-help"><span>Registrar Retiro del Dueño</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Registra dinero que el dueño saca del negocio para uso personal en una fecha concreta. Reduce la ganancia neta y tiene su propio umbral de control.">?</span></h3>
             <form id="withdrawalForm" class="form-grid" novalidate>
                 <div class="form-group">
-                    <label for="wdDate">Fecha</label>
+                    <label for="wdDate">Fecha <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Día en que se realizó el retiro.">?</span></label>
                     <input type="date" id="wdDate" name="date" required>
                 </div>
                 <div class="form-group">
-                    <label for="wdAmount">Monto ($)</label>
+                    <label for="wdAmount">Monto ($) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Importe retirado por el dueño ese día.">?</span></label>
                     <input type="number" id="wdAmount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
                 </div>
                 <div class="form-group full-width">
-                    <label for="wdDescription">Descripción (opcional)</label>
+                    <label for="wdDescription">Descripción (opcional) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Motivo o detalle del retiro. Es informativo y no afecta a los cálculos.">?</span></label>
                     <input type="text" id="wdDescription" name="description" placeholder="Motivo del retiro">
                 </div>
                 <button type="submit" class="btn btn-primary">Registrar Retiro</button>
@@ -72,7 +74,7 @@
             <div class="form-success" id="withdrawalSuccess" role="status"></div>
         </div>
         <div class="card">
-            <h3>Retiros Registrados</h3>
+            <h3 class="title-with-help"><span>Retiros Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Listado de los retiros del dueño ya cargados para el negocio activo.">?</span></h3>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead><tr><th>Fecha</th><th>Monto</th><th>Descripción</th></tr></thead>
@@ -85,10 +87,10 @@
     <!-- Variables Tab -->
     <section class="tab-content" id="tab-variables">
         <div class="card">
-            <h3>Registrar Gasto Variable</h3>
+            <h3 class="title-with-help"><span>Registrar Gasto Variable</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Carga un gasto que varía según la operación diaria, clasificado en una de las 8 categorías. Cada categoría se evalúa en el semáforo con su propio umbral.">?</span></h3>
             <form id="variableForm" class="form-grid" novalidate>
                 <div class="form-group">
-                    <label for="varCategory">Categoría</label>
+                    <label for="varCategory">Categoría <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Tipo de gasto variable: comisiones, mermas, servicios, insumos, mantenimiento, impuestos municipales, seguros o logística.">?</span></label>
                     <select id="varCategory" name="category" required>
                         <option value="">Seleccionar...</option>
                         <option value="comisiones">Comisiones</option>
@@ -117,9 +119,10 @@
             </form>
             <div class="form-error" id="variableError" role="alert"></div>
             <div class="form-success" id="variableSuccess" role="status"></div>
+            <div class="add-concept" id="addConceptVariable"></div>
         </div>
         <div class="card">
-            <h3>Gastos Variables Registrados</h3>
+            <h3 class="title-with-help"><span>Gastos Variables Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de gastos variables ya cargados, con fecha, categoría, monto y descripción.">?</span></h3>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead><tr><th>Fecha</th><th>Categoría</th><th>Monto</th><th>Descripción</th></tr></thead>
@@ -132,13 +135,15 @@
     <!-- Operativos Tab -->
     <section class="tab-content" id="tab-operativos">
         <div class="card">
-            <h3>Registrar Costo Operativo</h3>
+            <h3 class="title-with-help"><span>Registrar Costo Operativo</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Carga un costo fijo mensual (electricidad, monotributo, mercadería, alquiler o contable). Se asocia a un mes completo.">?</span></h3>
             <form id="operatingForm" class="form-grid" novalidate>
                 <div class="form-group">
-                    <label for="opCategory">Categoría</label>
+                    <label for="opCategory">Categoría <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Tipo de costo fijo: electricidad, monotributo, mercadería, alquiler o contable.">?</span></label>
                     <select id="opCategory" name="category" required>
                         <option value="">Seleccionar...</option>
                         <option value="electricidad">Electricidad</option>
+                        <option value="agua">Agua</option>
+                        <option value="internet">Internet</option>
                         <option value="monotributo">Monotributo</option>
                         <option value="mercaderia">Mercadería</option>
                         <option value="alquiler">Alquiler</option>
@@ -150,7 +155,7 @@
                     <input type="number" id="opAmount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
                 </div>
                 <div class="form-group">
-                    <label for="opMonth">Mes</label>
+                    <label for="opMonth">Mes <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Mes al que corresponde el costo. Usa siempre el primer día del mes (ej. 2024-01-01); el sistema lo imputa al mes completo en el semáforo.">?</span></label>
                     <input type="date" id="opMonth" name="month" required>
                     <small class="form-hint">Usar primer día del mes (ej: 2024-01-01)</small>
                 </div>
@@ -162,13 +167,75 @@
             </form>
             <div class="form-error" id="operatingError" role="alert"></div>
             <div class="form-success" id="operatingSuccess" role="status"></div>
+            <div class="add-concept" id="addConceptOperating"></div>
         </div>
         <div class="card">
-            <h3>Costos Operativos Registrados</h3>
+            <h3 class="title-with-help"><span>Costos Operativos Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de costos operativos fijos ya cargados, con mes, categoría, monto y descripción.">?</span></h3>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead><tr><th>Mes</th><th>Categoría</th><th>Monto</th><th>Descripción</th></tr></thead>
                     <tbody id="operatingTableBody"><tr><td colspan="4" class="loading-text">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ahorros Tab -->
+    <section class="tab-content" id="tab-ahorros">
+        <div class="card">
+            <h3 class="title-with-help"><span>Registrar Ahorro</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Registra cuánto apartaste para tu Fondo de Emergencia (colchón para imprevistos) o para Inversión (hacer crecer tu dinero). Más % del ingreso ahorrado = semáforo más verde.">?</span></h3>
+            <form id="savingsForm" class="form-grid" novalidate>
+                <div class="form-group">
+                    <label for="savKind">Tipo <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Emergencia: colchón de 3 a 6 meses de gastos. Inversión: dinero destinado a crecer (recomendado ~20% del ingreso).">?</span></label>
+                    <select id="savKind" name="kind" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="emergencia">Fondo de Emergencia</option>
+                        <option value="inversion">Inversión</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="savAmount">Monto ($)</label>
+                    <input type="number" id="savAmount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
+                </div>
+                <div class="form-group">
+                    <label for="savDate">Fecha</label>
+                    <input type="date" id="savDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="savDescription">Descripción (opcional)</label>
+                    <input type="text" id="savDescription" name="description" placeholder="Detalle">
+                </div>
+                <button type="submit" class="btn btn-primary">Registrar Ahorro</button>
+            </form>
+            <div class="form-error" id="savingsError" role="alert"></div>
+            <div class="form-success" id="savingsSuccess" role="status"></div>
+        </div>
+        <div class="card">
+            <h3 class="title-with-help"><span>Ahorros Registrados</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de aportes a emergencia e inversión del negocio activo.">?</span></h3>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Monto</th><th>Descripción</th></tr></thead>
+                    <tbody id="savingsTableBody"><tr><td colspan="4" class="loading-text">Cargando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Umbrales Tab (agente + edición manual) -->
+    <section class="tab-content" id="tab-umbrales">
+        <div class="card">
+            <h3 class="title-with-help"><span>🤖 Agente de Recomendación</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Aplica los márgenes de color recomendados por reglas financieras establecidas (regla 50/30/20, vivienda ≤25-30%, emergencia 3-6 meses). No sobrescribe los que edites a mano.">?</span></h3>
+            <p class="form-hint" style="margin-bottom:1rem;">Ajusta los umbrales del semáforo a valores recomendados a ciencia casi cierta según reglas de presupuesto ampliamente aceptadas.</p>
+            <button class="btn btn-primary" id="applyRecommendBtn">Aplicar recomendación a todo</button>
+            <div class="form-success" id="recommendSuccess" role="status"></div>
+            <div class="form-hint" id="recommendSources" style="margin-top:0.6rem;"></div>
+        </div>
+        <div class="card">
+            <h3 class="title-with-help"><span>Umbrales por Concepto</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Cada concepto cambia de color según el % que representa del ingreso. Para gastos, menos % es mejor; para ahorros es al revés. Edita y guarda para fijar tus propios márgenes.">?</span></h3>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Concepto</th><th>Verde</th><th>Amarillo</th><th>Naranja</th><th>Rojo</th><th>Recom.</th><th></th></tr></thead>
+                    <tbody id="thresholdsTableBody"><tr><td colspan="7" class="loading-text">Cargando...</td></tr></tbody>
                 </table>
             </div>
         </div>

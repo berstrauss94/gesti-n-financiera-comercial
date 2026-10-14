@@ -221,7 +221,7 @@ class TestOperatingCostSchema:
 
     def test_invalid_category(self):
         data = {
-            'category': 'internet',
+            'category': 'categoria_inexistente',
             'amount': '100.00',
             'month': '2024-01-01',
         }

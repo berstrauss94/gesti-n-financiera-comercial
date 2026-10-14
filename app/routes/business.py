@@ -62,10 +62,13 @@ def create_business():
     """Create a new business for the current user.
 
     Request body:
-        {"name": "Business Name"}
+        {"name": "Business Name", "business_type": "comercio"}
 
-    On success, seeds default thresholds for the new business.
+    business_type es opcional; si no se envía o es inválido, se usa 'comercio'.
+    Al crear, se siembran los umbrales por defecto del perfil elegido.
     """
+    from app.catalog import normalize_profile
+
     data = request.get_json(silent=True)
     if not data or not data.get('name', '').strip():
         return jsonify({
@@ -77,22 +80,25 @@ def create_business():
         }), 400
 
     name = data['name'].strip()
+    business_type = normalize_profile(data.get('business_type'))
 
     business = Business(
         name=name,
         owner_id=current_user.id,
+        business_type=business_type,
     )
 
     db.session.add(business)
     db.session.commit()
 
-    # Seed default threshold configurations for the new business
-    seed_default_thresholds(business.id)
+    # Seed default threshold configurations for the new business' profile
+    seed_default_thresholds(business.id, business_type=business_type)
 
     return jsonify({
         'business': {
             'id': business.id,
             'name': business.name,
+            'business_type': business.business_type,
             'owner_id': business.owner_id,
             'is_active': business.is_active,
             'created_at': business.created_at.isoformat() if business.created_at else None,
@@ -114,6 +120,7 @@ def list_businesses():
             {
                 'id': b.id,
                 'name': b.name,
+                'business_type': b.business_type,
                 'owner_id': b.owner_id,
                 'is_active': b.is_active,
                 'created_at': b.created_at.isoformat() if b.created_at else None,

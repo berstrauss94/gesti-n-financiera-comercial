@@ -6,6 +6,18 @@ from app.models.expense import Expense, Salary, VariableExpense, OperatingCost
 from app.models.owner_withdrawal import OwnerWithdrawal
 from app.models.threshold_config import ThresholdConfig, seed_default_thresholds
 from app.models.ml_prediction import MLPrediction
+from app.models.savings import SavingsAllocation
+from app.models.enterprise import (
+    BankAccount,
+    BankTransaction,
+    DocumentOCR,
+    Product,
+    ProductionOrder,
+    CustomField,
+    CustomFieldValue,
+    DigitalSignature,
+    HelpdeskTicket,
+)
 
 __all__ = [
     'User', 'Business', 'DailyIncome',
@@ -13,4 +25,10 @@ __all__ = [
     'OwnerWithdrawal',
     'ThresholdConfig', 'seed_default_thresholds',
     'MLPrediction',
+    'SavingsAllocation',
+    # Enterprise modules
+    'BankAccount', 'BankTransaction', 'DocumentOCR',
+    'Product', 'ProductionOrder',
+    'CustomField', 'CustomFieldValue',
+    'DigitalSignature', 'HelpdeskTicket',
 ]

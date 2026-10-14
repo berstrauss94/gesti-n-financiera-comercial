@@ -2,17 +2,17 @@
 import re
 from marshmallow import Schema, fields, validate, validates, ValidationError
 
+# Las categorías válidas se derivan del catálogo central (fuente única de verdad),
+# de modo que agregar una categoría al catálogo la habilita en toda la app.
+from app.catalog import variable_categories as _catalog_variable
+from app.catalog import operating_categories as _catalog_operating
 
-# Valid categories for variable expenses
-VALID_VARIABLE_EXPENSE_CATEGORIES = [
-    'comisiones', 'mermas', 'servicios', 'insumos',
-    'mantenimiento', 'impuestos_municipales', 'seguros', 'logistica',
-]
 
-# Valid categories for operating costs
-VALID_OPERATING_COST_CATEGORIES = [
-    'electricidad', 'monotributo', 'mercaderia', 'alquiler', 'contable',
-]
+# Valid categories for variable expenses (derivadas del catálogo)
+VALID_VARIABLE_EXPENSE_CATEGORIES = _catalog_variable()
+
+# Valid categories for operating costs (derivadas del catálogo)
+VALID_OPERATING_COST_CATEGORIES = _catalog_operating()
 
 # Validation error messages in Spanish
 VALIDATION_USERNAME_LENGTH = "Username debe tener mínimo 8 caracteres"

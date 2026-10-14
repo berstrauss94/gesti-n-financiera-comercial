@@ -60,10 +60,12 @@ async function loadDashboardHeatmap() {
 
         const data = await resp.json();
         const heatmap = data.heatmap || {};
+        // La respuesta trae {date, gross_income, indicators:{...}}.
+        // Solo las categorías dentro de "indicators" son indicadores del semáforo.
+        const indicators = heatmap.indicators || {};
 
         let html = '';
-        for (const [key, value] of Object.entries(heatmap)) {
-            if (key === 'net_profit') continue;
+        for (const [key, value] of Object.entries(indicators)) {
             const pct = value?.percentage;
             const emoji = App.getIndicatorEmoji(pct);
             const label = formatCategoryLabel(key);
@@ -76,12 +78,12 @@ async function loadDashboardHeatmap() {
                         <p class="indicator-name">${label}</p>
                         <p class="indicator-pct" style="${App.getIndicatorColor(pct)}">${pctText}</p>
                     </div>
-                    <span class="tooltip">${label}: ${pctText} del ingreso</span>
+                    <span class="tooltip">${label}: ${pctText} del ingreso bruto del día</span>
                 </div>
             `;
         }
 
-        container.innerHTML = html || '<p class="loading-text">Sin indicadores disponibles</p>';
+        container.innerHTML = html || '<p class="loading-text">Sin movimientos cargados para hoy. Registra un ingreso y gastos para ver el semáforo.</p>';
     } catch (e) {
         container.innerHTML = '<p class="loading-text">Error al cargar heatmap</p>';
     }
@@ -91,6 +93,7 @@ function formatCategoryLabel(key) {
     const labels = {
         salarios: 'Salarios',
         retiros: 'Retiros',
+        retiros_dueno: 'Retiros del Dueño',
         comisiones: 'Comisiones',
         mermas: 'Mermas',
         servicios: 'Servicios',
@@ -100,10 +103,14 @@ function formatCategoryLabel(key) {
         seguros: 'Seguros',
         logistica: 'Logística',
         electricidad: 'Electricidad',
+        agua: 'Agua',
+        internet: 'Internet',
         monotributo: 'Monotributo',
         mercaderia: 'Mercadería',
         alquiler: 'Alquiler',
         contable: 'Contable',
+        emergencia: 'Fondo de Emergencia',
+        inversion: 'Inversión',
     };
     return labels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }

@@ -8,12 +8,92 @@ document.addEventListener('DOMContentLoaded', () => {
     initVariableForm();
     initOperatingForm();
 
+    // Poblar categorías activas según el perfil del negocio + conceptos extra
+    loadCategories();
+
+    // Ahorros y umbrales (agente)
+    initSavingsForm();
+    initThresholdsAgent();
+
     // Load initial data
     loadSalaries();
     loadWithdrawals();
     loadVariableExpenses();
     loadOperatingCosts();
+    loadSavings();
+    loadThresholds();
 });
+
+// === Categorías dinámicas por perfil ===
+async function loadCategories() {
+    try {
+        const resp = await App.fetch('/api/categories');
+        if (!resp || !resp.ok) return;
+        const data = await resp.json();
+        const active = data.active || [];
+        const available = data.available || [];
+
+        // Rellenar los selects de categoría con las activas de cada grupo
+        fillCategorySelect('varCategory', active.filter(c => c.group === 'variable'));
+        fillCategorySelect('opCategory', active.filter(c => c.group === 'operativo'));
+
+        // Panel para agregar conceptos extra (de cualquier grupo que pueda cargarse)
+        renderAddConceptPanels(available);
+    } catch (e) {
+        // silencioso: si falla, quedan las opciones por defecto del HTML
+    }
+}
+
+function fillCategorySelect(selectId, categories) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    const current = select.value;
+    let html = '<option value="">Seleccionar...</option>';
+    categories.forEach(c => {
+        html += `<option value="${c.key}">${c.label}</option>`;
+    });
+    select.innerHTML = html;
+    if (current) select.value = current;
+}
+
+function renderAddConceptPanels(available) {
+    // Variables y operativos disponibles para activar
+    const varAvail = available.filter(c => c.group === 'variable');
+    const opAvail = available.filter(c => c.group === 'operativo');
+    renderAddConcept('addConceptVariable', varAvail);
+    renderAddConcept('addConceptOperating', opAvail);
+}
+
+function renderAddConcept(containerId, categories) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (categories.length === 0) {
+        container.innerHTML = '<small class="form-hint">No hay más conceptos para agregar en este grupo.</small>';
+        return;
+    }
+    let html = '<div class="add-concept-row"><select class="input-field add-concept-select">';
+    html += '<option value="">+ Agregar concepto...</option>';
+    categories.forEach(c => {
+        html += `<option value="${c.key}">${c.label}</option>`;
+    });
+    html += '</select><button class="btn btn-outline btn-sm add-concept-btn" type="button">Agregar</button></div>';
+    container.innerHTML = html;
+
+    const select = container.querySelector('.add-concept-select');
+    const btn = container.querySelector('.add-concept-btn');
+    btn.addEventListener('click', async () => {
+        const category = select.value;
+        if (!category) return;
+        const resp = await App.fetch('/api/categories', {
+            method: 'POST',
+            body: JSON.stringify({ category }),
+        });
+        if (resp && (resp.ok || resp.status === 200)) {
+            // Recargar selects y paneles
+            loadCategories();
+        }
+    });
+}
 
 // === Tabs ===
 function initTabs() {
@@ -310,6 +390,132 @@ async function loadOperatingCosts() {
     }
 }
 
+// === Ahorros (emergencia / inversión) ===
+function initSavingsForm() {
+    const form = document.getElementById('savingsForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        App.clearMessages('savingsError', 'savingsSuccess');
+        const body = {
+            kind: document.getElementById('savKind').value,
+            amount: parseFloat(document.getElementById('savAmount').value),
+            date: document.getElementById('savDate').value,
+        };
+        const desc = document.getElementById('savDescription').value.trim();
+        if (desc) body.description = desc;
+        if (!body.kind || !body.amount || !body.date) {
+            App.showError('savingsError', 'Complete tipo, monto y fecha');
+            return;
+        }
+        try {
+            const resp = await App.fetch('/api/savings', { method: 'POST', body: JSON.stringify(body) });
+            if (!resp) return;
+            const data = await resp.json();
+            if (resp.ok) {
+                App.showSuccess('savingsSuccess', '✓ Ahorro registrado');
+                form.reset();
+                loadSavings();
+            } else {
+                App.showError('savingsError', data.error?.message || 'Error');
+            }
+        } catch (err) {
+            App.showError('savingsError', 'Error de conexión');
+        }
+    });
+}
+
+async function loadSavings() {
+    const tbody = document.getElementById('savingsTableBody');
+    if (!tbody) return;
+    try {
+        const resp = await App.fetch('/api/savings');
+        if (!resp || resp.status === 403) {
+            tbody.innerHTML = '<tr><td colspan="4" class="loading-text">Seleccione un negocio</td></tr>';
+            return;
+        }
+        if (!resp.ok) { tbody.innerHTML = '<tr><td colspan="4" class="loading-text">Error</td></tr>'; return; }
+        const data = await resp.json();
+        const items = data.savings || [];
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="loading-text">Sin ahorros registrados</td></tr>';
+            return;
+        }
+        const kindLabel = { emergencia: 'Fondo de Emergencia', inversion: 'Inversión' };
+        tbody.innerHTML = items.map(s => `
+            <tr>
+                <td>${s.date}</td>
+                <td>${kindLabel[s.kind] || s.kind}</td>
+                <td>${App.formatMoney(s.amount)}</td>
+                <td>${s.description || '—'}</td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" class="loading-text">Error de conexión</td></tr>';
+    }
+}
+
+// === Umbrales (agente de recomendación + edición manual) ===
+function initThresholdsAgent() {
+    const btn = document.getElementById('applyRecommendBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const resp = await App.fetch('/api/savings/recommend/apply', { method: 'POST', body: JSON.stringify({}) });
+        if (resp && resp.ok) {
+            const data = await resp.json();
+            App.showSuccess('recommendSuccess', `✓ ${data.message}`);
+            loadThresholds();
+        }
+    });
+}
+
+async function loadThresholds() {
+    const tbody = document.getElementById('thresholdsTableBody');
+    if (!tbody) return;
+    try {
+        const resp = await App.fetch('/api/savings/thresholds');
+        if (!resp || resp.status === 403) {
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Seleccione un negocio</td></tr>';
+            return;
+        }
+        if (!resp.ok) { tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error</td></tr>'; return; }
+        const data = await resp.json();
+        const items = (data.thresholds || []).filter(t => t.category !== 'ganancia_neta');
+        if (items.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Sin umbrales</td></tr>';
+            return;
+        }
+        tbody.innerHTML = items.map(t => `
+            <tr data-cat="${t.category}">
+                <td>${t.label}${t.inverted ? ' 🔼' : ''}${t.is_custom ? ' <small style="color:var(--accent-blue)">(custom)</small>' : ''}</td>
+                <td><input type="number" step="0.01" class="th-input" data-f="green" value="${t.green_max}" style="width:70px"></td>
+                <td><input type="number" step="0.01" class="th-input" data-f="yellow" value="${t.yellow_max}" style="width:70px"></td>
+                <td><input type="number" step="0.01" class="th-input" data-f="orange" value="${t.orange_max}" style="width:70px"></td>
+                <td><input type="number" step="0.01" class="th-input" data-f="red" value="${t.red_max}" style="width:70px"></td>
+                <td>${t.has_recommendation === false ? '—' : '✓'}</td>
+                <td><button class="btn btn-outline btn-sm th-save" type="button">Guardar</button></td>
+            </tr>
+        `).join('');
+
+        tbody.querySelectorAll('.th-save').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const row = e.target.closest('tr');
+                const cat = row.dataset.cat;
+                const vals = {};
+                row.querySelectorAll('.th-input').forEach(inp => {
+                    vals[inp.dataset.f + '_max'] = parseFloat(inp.value);
+                });
+                const resp = await App.fetch(`/api/savings/thresholds/${cat}`, {
+                    method: 'PUT', body: JSON.stringify(vals),
+                });
+                if (resp && resp.ok) loadThresholds();
+            });
+        });
+    } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-text">Error de conexión</td></tr>';
+    }
+}
+
 // === Helpers ===
 function formatCategoryName(cat) {
     const names = {
@@ -321,7 +527,11 @@ function formatCategoryName(cat) {
         impuestos_municipales: 'Imp. Municipales',
         seguros: 'Seguros',
         logistica: 'Logística',
+        emergencia: 'Fondo de Emergencia',
+        inversion: 'Inversión',
         electricidad: 'Electricidad',
+        agua: 'Agua',
+        internet: 'Internet',
         monotributo: 'Monotributo',
         mercaderia: 'Mercadería',
         alquiler: 'Alquiler',

@@ -17,20 +17,38 @@
         <div class="sidebar-user">
             <span class="user-icon">👤</span>
             <span class="user-name">{{ current_user.username }}</span>
+            <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Usuario con el que iniciaste sesión. Cada usuario administra sus propios negocios de forma aislada (multi-tenant).">?</span>
         </div>
         <div class="sidebar-business" id="sidebarBusiness">
             <span class="business-label">Negocio activo:</span>
             <span class="business-name" id="activeBusinessName">Cargando...</span>
+            <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Negocio sobre el que estás trabajando. Debes tener uno seleccionado para registrar ingresos y gastos. Haz clic aquí para crear o cambiar de negocio.">?</span>
         </div>
         <ul class="sidebar-nav">
-            <li><a href="{{ url_for('frontend.dashboard') }}" class="{% if request.endpoint == 'frontend.dashboard' %}active{% endif %}">📊 Dashboard</a></li>
-            <li><a href="{{ url_for('frontend.income') }}" class="{% if request.endpoint == 'frontend.income' %}active{% endif %}">💵 Ingresos</a></li>
-            <li><a href="{{ url_for('frontend.expenses') }}" class="{% if request.endpoint == 'frontend.expenses' %}active{% endif %}">💸 Gastos</a></li>
-            <li><a href="{{ url_for('frontend.heatmap') }}" class="{% if request.endpoint == 'frontend.heatmap' %}active{% endif %}">🔥 Heatmap</a></li>
-            <li><a href="{{ url_for('frontend.reports') }}" class="{% if request.endpoint == 'frontend.reports' %}active{% endif %}">📈 Reportes</a></li>
+            <li>
+                <a href="{{ url_for('frontend.dashboard') }}" class="{% if request.endpoint == 'frontend.dashboard' %}active{% endif %}">📊 Dashboard</a>
+                <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Vista general del negocio: ingreso bruto, ganancia neta y gastos del mes, más el semáforo financiero del día y accesos rápidos.">?</span>
+            </li>
+            <li>
+                <a href="{{ url_for('frontend.income') }}" class="{% if request.endpoint == 'frontend.income' %}active{% endif %}">💵 Ingresos</a>
+                <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Registra el ingreso bruto diario. Es la base 100% sobre la que se calculan todos los gastos y la ganancia neta. Solo se admite un ingreso por fecha.">?</span>
+            </li>
+            <li>
+                <a href="{{ url_for('frontend.expenses') }}" class="{% if request.endpoint == 'frontend.expenses' %}active{% endif %}">💸 Gastos</a>
+                <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Carga tus egresos: salarios de empleados, retiros del dueño, gastos variables y costos operativos fijos. Cada tipo se evalúa con sus propios umbrales.">?</span>
+            </li>
+            <li>
+                <a href="{{ url_for('frontend.heatmap') }}" class="{% if request.endpoint == 'frontend.heatmap' %}active{% endif %}">🔥 Heatmap</a>
+                <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Semáforo de calor: muestra cada gasto como porcentaje del ingreso y lo pinta de verde a crítico según los umbrales. Incluye el indicador maestro de ganancia neta.">?</span>
+            </li>
+            <li>
+                <a href="{{ url_for('frontend.reports') }}" class="{% if request.endpoint == 'frontend.reports' %}active{% endif %}">📈 Reportes</a>
+                <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Genera reportes por período (diario a anual), compara dos períodos entre sí y exporta los resultados a CSV o PDF.">?</span>
+            </li>
         </ul>
         <div class="sidebar-footer">
             <button class="btn btn-outline btn-sm" id="logoutBtn">🚪 Cerrar Sesión</button>
+            <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Cierra tu sesión de forma segura. Por seguridad, la sesión también expira automáticamente tras 30 minutos de inactividad.">?</span>
         </div>
     </nav>
     <div class="main-wrapper">

@@ -75,23 +75,33 @@ class ThresholdConfig(db.Model):
         return f'<ThresholdConfig {self.category} for business {self.business_id}>'
 
 
-def seed_default_thresholds(business_id):
+def seed_default_thresholds(business_id, business_type=None):
     """
-    Create default threshold configurations for all categories for a given business.
+    Create default threshold configurations for a given business.
 
-    This function creates one ThresholdConfig entry per category using the
-    predefined DEFAULT_THRESHOLDS values. Existing configurations for the
-    business are skipped (upsert-safe).
+    Si se indica `business_type`, se siembran SOLO las categorías del perfil
+    (más 'ganancia_neta'). Si no se indica, se siembran TODAS las categorías de
+    DEFAULT_THRESHOLDS (comportamiento histórico, usado por los tests).
+
+    Existing configurations for the business are skipped (upsert-safe).
 
     Args:
         business_id: The ID of the business to seed thresholds for.
+        business_type: Perfil de negocio opcional para filtrar categorías.
 
     Returns:
         list[ThresholdConfig]: List of created ThresholdConfig instances.
     """
+    if business_type is None:
+        thresholds = DEFAULT_THRESHOLDS
+    else:
+        # Importación local para evitar ciclos de import
+        from app.catalog import default_thresholds_for_profile
+        thresholds = default_thresholds_for_profile(business_type)
+
     created = []
 
-    for category, (green_max, yellow_max, orange_max, red_max) in DEFAULT_THRESHOLDS.items():
+    for category, (green_max, yellow_max, orange_max, red_max) in thresholds.items():
         # Skip if configuration already exists for this business+category
         existing = ThresholdConfig.query.filter_by(
             business_id=business_id,

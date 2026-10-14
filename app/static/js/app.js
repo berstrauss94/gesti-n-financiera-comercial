@@ -190,6 +190,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Pista según el tipo de negocio elegido
+    const typeSelect = document.getElementById('newBusinessType');
+    const typeHint = document.getElementById('businessTypeHint');
+    const TYPE_HINTS = {
+        comercio: 'Comercio: salarios, mercadería, 8 gastos variables y costos operativos completos.',
+        hogar: 'Hogar: alquiler, servicios, supermercado, seguros, salud e impuestos. Sin salarios ni comisiones.',
+        expansion: 'Expansión: set completo con foco en logística e inversión.',
+        servicios: 'Servicios: honorarios, servicios, insumos e impuestos. Sin mercadería ni mermas.',
+    };
+    if (typeSelect && typeHint) {
+        typeSelect.addEventListener('change', () => {
+            typeHint.textContent = TYPE_HINTS[typeSelect.value] || '';
+        });
+    }
+
     // Create business
     const createBusinessBtn = document.getElementById('createBusinessBtn');
     if (createBusinessBtn) {
@@ -197,10 +212,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const nameInput = document.getElementById('newBusinessName');
             const name = nameInput.value.trim();
             if (!name) return;
+            const businessType = typeSelect ? typeSelect.value : 'comercio';
 
             const resp = await App.fetch('/api/businesses', {
                 method: 'POST',
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({ name, business_type: businessType }),
             });
             if (resp && resp.ok) {
                 const data = await resp.json();
@@ -238,9 +254,12 @@ async function loadBusinessList() {
         return;
     }
 
+    const TYPE_LABELS = {
+        comercio: 'Comercio', hogar: 'Hogar', expansion: 'Expansión', servicios: 'Servicios',
+    };
     list.innerHTML = businesses.map(b => `
         <div class="business-item" data-id="${b.id}">
-            <span>${b.name}</span>
+            <span>${b.name} <small style="color:var(--text-muted)">(${TYPE_LABELS[b.business_type] || b.business_type || 'Comercio'})</small></span>
             <button class="btn btn-sm btn-outline" onclick="selectBusiness(${b.id}, '${b.name}')">Seleccionar</button>
         </div>
     `).join('');

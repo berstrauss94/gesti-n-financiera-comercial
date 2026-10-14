@@ -6,18 +6,18 @@
 <div class="page-income">
     <!-- Income Form -->
     <section class="card">
-        <h3>Registrar Ingreso Diario</h3>
+        <h3 class="title-with-help"><span>Registrar Ingreso Diario</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Carga el total vendido (ingreso bruto) de un día. Es la base 100% del análisis: todos los gastos se miden como porcentaje de este valor. Solo se permite un ingreso por fecha.">?</span></h3>
         <form id="incomeForm" class="form-inline" novalidate>
             <div class="form-group">
-                <label for="incomeDate">Fecha</label>
+                <label for="incomeDate">Fecha <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Día al que corresponde el ingreso. No puede repetirse: si ya existe un ingreso para esa fecha, deberás editarlo en lugar de crear otro.">?</span></label>
                 <input type="date" id="incomeDate" name="date" required>
             </div>
             <div class="form-group">
-                <label for="incomeAmount">Monto ($)</label>
+                <label for="incomeAmount">Monto ($) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Importe bruto vendido ese día, antes de descontar gastos. Debe estar entre 0,01 y 999.999.999,99.">?</span></label>
                 <input type="number" id="incomeAmount" name="amount" step="0.01" min="0.01" placeholder="0.00" required>
             </div>
             <div class="form-group">
-                <label for="incomeNotes">Notas (opcional)</label>
+                <label for="incomeNotes">Notas (opcional) <span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Texto libre para anotar detalles del día (ej. feriado, promoción). No afecta a los cálculos.">?</span></label>
                 <input type="text" id="incomeNotes" name="notes" placeholder="Observaciones">
             </div>
             <button type="submit" class="btn btn-primary">Registrar</button>
@@ -28,7 +28,7 @@
 
     <!-- Income List -->
     <section class="card">
-        <h3>Ingresos Recientes</h3>
+        <h3 class="title-with-help"><span>Ingresos Recientes</span><span class="help-tip" tabindex="0" role="button" aria-label="Ayuda" data-help="Historial de los ingresos diarios ya registrados para el negocio activo, ordenados por fecha.">?</span></h3>
         <div class="table-wrapper">
             <table class="data-table" id="incomeTable">
                 <thead>

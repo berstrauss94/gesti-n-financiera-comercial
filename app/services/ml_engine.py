@@ -15,31 +15,21 @@ from app.models.expense import VariableExpense, OperatingCost, Salary
 from app.models.owner_withdrawal import OwnerWithdrawal
 from app.models.ml_prediction import MLPrediction
 from app.models.threshold_config import ThresholdConfig, DEFAULT_THRESHOLDS
+from app.catalog import operating_categories as _catalog_operating
+
+# Categorías operativas del catálogo (fuente única de verdad)
+_OPERATING_CATEGORIES = tuple(_catalog_operating())
 
 
 ML_MOVING_AVERAGE_DAYS = 90
 RECALIBRATION_THRESHOLD = 0.10
 MIN_RECORDS = 5
 
-# Valid categories for ML predictions
-ML_CATEGORIES = [
-    'ingresos',
-    'salarios',
-    'retiros_dueno',
-    'comisiones',
-    'mermas',
-    'servicios',
-    'insumos',
-    'mantenimiento',
-    'impuestos_municipales',
-    'seguros',
-    'logistica',
-    'electricidad',
-    'monotributo',
-    'mercaderia',
-    'alquiler',
-    'contable',
-]
+# Valid categories for ML predictions.
+# 'ingresos' + todas las categorías del catálogo (fuente única de verdad).
+from app.catalog import all_categories as _catalog_all_categories
+
+ML_CATEGORIES = ['ingresos'] + _catalog_all_categories()
 
 
 def calculate_moving_average(values, window=ML_MOVING_AVERAGE_DAYS):
@@ -111,7 +101,7 @@ def _fetch_category_values(business_id, category, days=ML_MOVING_AVERAGE_DAYS):
         ).order_by(OwnerWithdrawal.date.asc()).all()
         return [(r.date, float(r.amount)) for r in records]
 
-    elif category in ('electricidad', 'monotributo', 'mercaderia', 'alquiler', 'contable'):
+    elif category in _OPERATING_CATEGORIES:
         # Operating costs
         records = OperatingCost.query.filter(
             OperatingCost.business_id == business_id,

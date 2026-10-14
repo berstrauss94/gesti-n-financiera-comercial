@@ -148,6 +148,15 @@ def create_app(config_name=None):
     from app.routes.ml import ml_bp
     app.register_blueprint(ml_bp, url_prefix='/api/ml')
 
+    from app.routes.enterprise import enterprise_bp
+    app.register_blueprint(enterprise_bp)
+
+    from app.routes.categories import categories_bp
+    app.register_blueprint(categories_bp, url_prefix='/api')
+
+    from app.routes.savings import savings_bp
+    app.register_blueprint(savings_bp, url_prefix='/api/savings')
+
     from app.routes.frontend import frontend_bp
     app.register_blueprint(frontend_bp)
 

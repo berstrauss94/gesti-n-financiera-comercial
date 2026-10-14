@@ -13,9 +13,14 @@ from decimal import Decimal
 from sqlalchemy import func
 
 from app import db
+from app.catalog import operating_categories as _catalog_operating
+from app.catalog import variable_categories as _catalog_variable
+from app.catalog import savings_categories as _catalog_savings
+from app.catalog import is_inverted as _is_inverted
 from app.models.income import DailyIncome
 from app.models.expense import Salary, VariableExpense, OperatingCost
 from app.models.owner_withdrawal import OwnerWithdrawal
+from app.models.savings import SavingsAllocation
 from app.models.threshold_config import ThresholdConfig, DEFAULT_THRESHOLDS
 
 
@@ -27,6 +32,25 @@ HEATMAP_COLORS = {
     'critical': '🚨',
     'neutral': '⚪',
 }
+
+# Categorías del catálogo por grupo (fuente única de verdad)
+_CATALOG_VARIABLE = _catalog_variable()
+_CATALOG_OPERATIVO = _catalog_operating()
+_CATALOG_SAVINGS = _catalog_savings()
+
+
+def _active_categories_for_business(business_id):
+    """Conjunto de categorías activas de un negocio = las que tienen ThresholdConfig.
+
+    Si el negocio no tiene ninguna configurada (caso borde), se devuelve el
+    catálogo completo para preservar el comportamiento histórico.
+    """
+    rows = ThresholdConfig.query.filter_by(business_id=business_id).all()
+    active = {r.category for r in rows}
+    if not active:
+        # Sin configuración: mostrar todo el catálogo (compatibilidad)
+        return set(_CATALOG_VARIABLE) | set(_CATALOG_OPERATIVO) | {'salarios', 'retiros_dueno'}
+    return active
 
 # Categories tracked by the heatmap
 EXPENSE_CATEGORIES = [
@@ -70,6 +94,28 @@ def calculate_heatmap_color(percentage, thresholds):
         return 'red'
     else:
         return 'critical'
+
+
+def calculate_inverted_color(percentage, thresholds):
+    """Color para categorías de ahorro (lógica invertida: más % es mejor).
+
+    thresholds: dict con 'green', 'yellow', 'orange' como MÍNIMOS.
+      >= green  -> green
+      >= yellow -> yellow
+      >= orange -> orange
+      < orange  -> red
+      None      -> neutral
+    """
+    if percentage is None:
+        return 'neutral'
+    if percentage >= thresholds['green']:
+        return 'green'
+    elif percentage >= thresholds['yellow']:
+        return 'yellow'
+    elif percentage >= thresholds['orange']:
+        return 'orange'
+    else:
+        return 'red'
 
 
 def calculate_percentage_of_income(expense_amount, gross_income):
@@ -197,35 +243,41 @@ def calculate_all_indicators(business_id, date):
 
     operating_by_category = {cat: float(total) for cat, total in operating_costs}
 
-    # 6. Build indicators
+    # 6. Determinar qué categorías mostrar.
+    # Se usan las categorías ACTIVAS del negocio (las que tienen ThresholdConfig),
+    # lo que respeta el perfil y los conceptos extra opt-in. Si el negocio no
+    # tuviera ninguna configurada, se cae al catálogo completo (compatibilidad).
+    active_categories = _active_categories_for_business(business_id)
+
+    # 7. Build indicators
     indicators = {}
 
-    # Salarios
-    sal_amount = float(salary_total)
-    sal_pct = calculate_percentage_of_income(sal_amount, gross_income)
-    sal_thresholds = _get_thresholds_for_category(business_id, 'salarios')
-    indicators['salarios'] = {
-        'amount': sal_amount,
-        'percentage': sal_pct,
-        'color': calculate_heatmap_color(sal_pct, sal_thresholds),
-    }
+    # Salarios (si está activo)
+    if 'salarios' in active_categories:
+        sal_amount = float(salary_total)
+        sal_pct = calculate_percentage_of_income(sal_amount, gross_income)
+        sal_thresholds = _get_thresholds_for_category(business_id, 'salarios')
+        indicators['salarios'] = {
+            'amount': sal_amount,
+            'percentage': sal_pct,
+            'color': calculate_heatmap_color(sal_pct, sal_thresholds),
+        }
 
-    # Retiros del dueño
-    wd_amount = float(withdrawal_total)
-    wd_pct = calculate_percentage_of_income(wd_amount, gross_income)
-    wd_thresholds = _get_thresholds_for_category(business_id, 'retiros_dueno')
-    indicators['retiros_dueno'] = {
-        'amount': wd_amount,
-        'percentage': wd_pct,
-        'color': calculate_heatmap_color(wd_pct, wd_thresholds),
-    }
+    # Retiros del dueño (si está activo)
+    if 'retiros_dueno' in active_categories:
+        wd_amount = float(withdrawal_total)
+        wd_pct = calculate_percentage_of_income(wd_amount, gross_income)
+        wd_thresholds = _get_thresholds_for_category(business_id, 'retiros_dueno')
+        indicators['retiros_dueno'] = {
+            'amount': wd_amount,
+            'percentage': wd_pct,
+            'color': calculate_heatmap_color(wd_pct, wd_thresholds),
+        }
 
-    # Variable expense categories
-    variable_categories = [
-        'comisiones', 'mermas', 'servicios', 'insumos',
-        'mantenimiento', 'impuestos_municipales', 'seguros', 'logistica',
-    ]
-    for cat in variable_categories:
+    # Gastos variables activos
+    for cat in _CATALOG_VARIABLE:
+        if cat not in active_categories:
+            continue
         amount = variable_by_category.get(cat, 0.0)
         pct = calculate_percentage_of_income(amount, gross_income)
         thresholds = _get_thresholds_for_category(business_id, cat)
@@ -235,9 +287,10 @@ def calculate_all_indicators(business_id, date):
             'color': calculate_heatmap_color(pct, thresholds),
         }
 
-    # Operating cost categories
-    operating_categories = ['electricidad', 'monotributo', 'alquiler', 'contable']
-    for cat in operating_categories:
+    # Costos operativos activos
+    for cat in _CATALOG_OPERATIVO:
+        if cat not in active_categories:
+            continue
         amount = operating_by_category.get(cat, 0.0)
         pct = calculate_percentage_of_income(amount, gross_income)
         thresholds = _get_thresholds_for_category(business_id, cat)
@@ -245,6 +298,27 @@ def calculate_all_indicators(business_id, date):
             'amount': amount,
             'percentage': pct,
             'color': calculate_heatmap_color(pct, thresholds),
+        }
+
+    # Ahorros activos (lógica invertida: más % del ingreso es mejor)
+    savings_by_kind = {}
+    for cat in _CATALOG_SAVINGS:
+        if cat not in active_categories:
+            continue
+        s_total = db.session.query(
+            func.coalesce(func.sum(SavingsAllocation.amount), 0)
+        ).filter(
+            SavingsAllocation.business_id == business_id,
+            SavingsAllocation.kind == cat,
+            SavingsAllocation.date == date,
+        ).scalar()
+        amount = float(s_total)
+        pct = calculate_percentage_of_income(amount, gross_income)
+        thresholds = _get_thresholds_for_category(business_id, cat)
+        indicators[cat] = {
+            'amount': amount,
+            'percentage': pct,
+            'color': calculate_inverted_color(pct, thresholds),
         }
 
     return {
